@@ -10,7 +10,6 @@ import com.amazonaws.services.ec2.model.DescribeSpotFleetRequestsRequest;
 import com.amazonaws.services.ec2.model.DescribeSpotFleetRequestsResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.ModifySpotFleetRequestRequest;
-import com.amazonaws.services.ec2.model.ModifySpotFleetRequestResult;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.SpotFleetRequestConfig;
 import com.amazonaws.services.ec2.model.SpotFleetRequestConfigData;
@@ -32,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -57,57 +56,6 @@ public class ProvisionIntegrationTest {
 
     @ClassRule
     public static BuildWatcher bw = new BuildWatcher();
-
-    private static class MockAmazonEC2 extends EmptyAmazonEC2 {
-
-        private static final Logger LOGGER = Logger.getLogger(MockAmazonEC2.class.getName());
-
-        private volatile int targetCapacity = 0;
-
-        @Override
-        public DescribeInstancesResult describeInstances(DescribeInstancesRequest request) {
-            Reservation reservation = new Reservation();
-            if (request.getInstanceIds().size() > 0) {
-                reservation.setInstances(Arrays.asList(new Instance()
-                        .withInstanceId(request.getInstanceIds().get(0))
-                        .withPublicIpAddress("public-ip")
-                ));
-            }
-            List<Reservation> reservations = new ArrayList<>();
-            reservations.add(reservation);
-            return new DescribeInstancesResult().withReservations(reservations);
-        }
-
-        @Override
-        public DescribeSpotFleetInstancesResult describeSpotFleetInstances(DescribeSpotFleetInstancesRequest request) {
-            LOGGER.info("Describe spot fleet instances with target capacity " + targetCapacity);
-            DescribeSpotFleetInstancesResult result = new DescribeSpotFleetInstancesResult();
-            List<ActiveInstance> activeInstances = new ArrayList<>();
-            for (int i = 0; i < targetCapacity; i++) {
-                activeInstances.add(new ActiveInstance().withInstanceId("i-" + i));
-            }
-            result.setActiveInstances(activeInstances);
-            return result;
-        }
-
-        @Override
-        public DescribeSpotFleetRequestsResult describeSpotFleetRequests(DescribeSpotFleetRequestsRequest request) {
-            LOGGER.info("Describe spot fleet requests");
-            return new DescribeSpotFleetRequestsResult().withSpotFleetRequestConfigs(Arrays.asList(
-                    new SpotFleetRequestConfig()
-                            .withSpotFleetRequestState("active")
-                            .withSpotFleetRequestConfig(
-                                    new SpotFleetRequestConfigData().withTargetCapacity(0))));
-        }
-
-        @Override
-        public ModifySpotFleetRequestResult modifySpotFleetRequest(ModifySpotFleetRequestRequest request) {
-            LOGGER.info("Set target capacity to " + request.getTargetCapacity());
-            targetCapacity = request.getTargetCapacity();
-            return null;
-        }
-
-    }
 
     @After
     public void after() {
@@ -130,7 +78,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), Mockito.nullable(String.class))).thenReturn(amazonEC2);
 
         when(amazonEC2.describeSpotFleetInstances(any(DescribeSpotFleetInstancesRequest.class)))
                 .thenReturn(new DescribeSpotFleetInstancesResult());
@@ -170,7 +118,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), Mockito.nullable(String.class))).thenReturn(amazonEC2);
 
         when(amazonEC2.describeInstances(any(DescribeInstancesRequest.class)))
                 .thenReturn(new DescribeInstancesResult());
@@ -239,7 +187,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), Mockito.nullable(String.class))).thenReturn(amazonEC2);
 
         when(amazonEC2.describeInstances(any(DescribeInstancesRequest.class)))
                 .then(new Answer<Object>() {
@@ -321,7 +269,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), Mockito.nullable(String.class))).thenReturn(amazonEC2);
 
         when(amazonEC2.describeInstances(any(DescribeInstancesRequest.class)))
                 .then(new Answer<Object>() {
