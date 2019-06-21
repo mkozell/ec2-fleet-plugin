@@ -121,8 +121,8 @@ public class ProvisionIntegrationTest {
         ComputerConnector computerConnector = mock(ComputerConnector.class);
         when(computerConnector.launch(anyString(), any(TaskListener.class))).thenReturn(computerLauncher);
 
-        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region", "fId",
-                "momo", null, computerConnector, false, false,
+        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region",
+                null, "fId", "momo", null, computerConnector, false, false,
                 0, 0, 0, 1, false, false);
         j.jenkins.clouds.add(cloud);
 
@@ -130,7 +130,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
 
         when(amazonEC2.describeSpotFleetInstances(any(DescribeSpotFleetInstancesRequest.class)))
                 .thenReturn(new DescribeSpotFleetInstancesResult());
@@ -161,8 +161,8 @@ public class ProvisionIntegrationTest {
         ComputerConnector computerConnector = mock(ComputerConnector.class);
         when(computerConnector.launch(anyString(), any(TaskListener.class))).thenReturn(computerLauncher);
 
-        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region", "fId",
-                "momo", null, computerConnector, false, false,
+        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region",
+                null, "fId", "momo", null, computerConnector, false, false,
                 0, 0, 10, 1, false, false);
         j.jenkins.clouds.add(cloud);
 
@@ -170,7 +170,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
 
         when(amazonEC2.describeInstances(any(DescribeInstancesRequest.class)))
                 .thenReturn(new DescribeInstancesResult());
@@ -230,8 +230,8 @@ public class ProvisionIntegrationTest {
         ComputerConnector computerConnector = mock(ComputerConnector.class);
         when(computerConnector.launch(anyString(), any(TaskListener.class))).thenReturn(computerLauncher);
 
-        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region", "fId",
-                "momo", null, computerConnector, false, false,
+        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region",
+                null, "fId", "momo", null, computerConnector, false, false,
                 0, 0, 10, 1, false, false);
         j.jenkins.clouds.add(cloud);
 
@@ -239,7 +239,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
 
         when(amazonEC2.describeInstances(any(DescribeInstancesRequest.class)))
                 .then(new Answer<Object>() {
@@ -312,8 +312,8 @@ public class ProvisionIntegrationTest {
         ComputerConnector computerConnector = mock(ComputerConnector.class);
         when(computerConnector.launch(anyString(), any(TaskListener.class))).thenReturn(computerLauncher);
 
-        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region", "fId",
-                "momo", null, computerConnector, false, false,
+        EC2FleetCloud cloud = new EC2FleetCloud(null, "credId", null, "region",
+                null, "fId", "momo", null, computerConnector, false, false,
                 0, 0, 10, 1, true, false);
         j.jenkins.clouds.add(cloud);
 
@@ -321,7 +321,7 @@ public class ProvisionIntegrationTest {
         Registry.setEc2Api(ec2Api);
 
         AmazonEC2 amazonEC2 = mock(AmazonEC2.class);
-        when(ec2Api.connect(anyString(), anyString())).thenReturn(amazonEC2);
+        when(ec2Api.connect(anyString(), anyString(), anyString())).thenReturn(amazonEC2);
 
         when(amazonEC2.describeInstances(any(DescribeInstancesRequest.class)))
                 .then(new Answer<Object>() {
