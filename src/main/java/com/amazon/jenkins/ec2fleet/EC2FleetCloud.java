@@ -33,6 +33,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -700,6 +701,10 @@ public class EC2FleetCloud extends Cloud {
         public String fleet;
         public boolean showAllFleets;
 
+        public List getAADescriptors() {
+            return Arrays.asList(new CreateFleet.DescriptorImpl());
+        }
+
         public DescriptorImpl() {
             super();
             load();
@@ -771,6 +776,20 @@ public class EC2FleetCloud extends Cloud {
             try {
                 // read state to check if we have access
                 EC2Fleets.get(fleet).getState(awsCredentialsId, region, endpoint, fleet);
+            } catch (final Exception ex) {
+                return FormValidation.error(ex.getMessage());
+            }
+            return FormValidation.ok("Success");
+        }
+
+        public FormValidation doCreateNew(
+                @QueryParameter final String awsCredentialsId,
+                @QueryParameter final String region,
+                @QueryParameter final String endpoint,
+                @QueryParameter final String fleet) {
+            try {
+                // read state to check if we have access
+                EC2Fleets.EC2_SPOT_FLEET.create(awsCredentialsId, region, endpoint);
             } catch (final Exception ex) {
                 return FormValidation.error(ex.getMessage());
             }

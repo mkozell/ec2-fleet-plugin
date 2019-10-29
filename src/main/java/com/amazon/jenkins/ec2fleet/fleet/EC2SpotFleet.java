@@ -28,6 +28,11 @@ import java.util.Set;
 public class EC2SpotFleet implements EC2Fleet {
 
     @Override
+    public void create(String awsCredentialsId, String regionName, String endpoint) {
+        // todo
+    }
+
+    @Override
     public void describe(
             final String awsCredentialsId, final String regionName, final String endpoint,
             final ListBoxModel model, final String selectedId, final boolean showAll) {

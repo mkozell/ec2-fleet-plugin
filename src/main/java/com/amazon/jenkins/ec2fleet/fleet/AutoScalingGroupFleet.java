@@ -1,5 +1,6 @@
 package com.amazon.jenkins.ec2fleet.fleet;
 
+import com.amazon.jenkins.ec2fleet.AWSUtils;
 import com.amazon.jenkins.ec2fleet.FleetStateStats;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
@@ -24,6 +25,11 @@ import java.util.Set;
 
 @ThreadSafe
 public class AutoScalingGroupFleet implements EC2Fleet {
+
+    @Override
+    public void create(String awsCredentialsId, String regionName, String endpoint) {
+        throw new UnsupportedOperationException("implement");
+    }
 
     @Override
     public void describe(
@@ -93,7 +99,7 @@ public class AutoScalingGroupFleet implements EC2Fleet {
     private AmazonAutoScalingClient createClient(
             final String awsCredentialsId, final String regionName, final String endpoint) {
         final AmazonWebServicesCredentials credentials = AWSCredentialsHelper.getCredentials(awsCredentialsId, Jenkins.getInstance());
-        final AmazonAutoScalingClient client = new AmazonAutoScalingClient(credentials);
+        final AmazonAutoScalingClient client =  new AmazonAutoScalingClient(credentials, AWSUtils.getClientConfiguration());
         final String effectiveEndpoint = getEndpoint(regionName, endpoint);
         if (effectiveEndpoint != null) client.setEndpoint(effectiveEndpoint);
         return client;

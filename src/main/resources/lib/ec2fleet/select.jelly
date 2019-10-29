@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout"
+         xmlns:f="/lib/form">
+  <st:documentation>
+    A <code>select</code> control that supports the data binding and AJAX updates with support for adding credentials.
+    Your descriptor should have the 'doFillXyzItems' method, which returns a StandardListBoxModel
+    representation of the credentials in your drop-down list box, and your instance field should
+    hold the current value.
+
+    <st:attribute name="clazz">
+      Additional CSS classes that the control gets.
+    </st:attribute>
+    <st:attribute name="field">
+      Used for databinding.
+    </st:attribute>
+    <st:attribute name="default">
+      The default value of the text box, in case both @value is and 'instance[field]' is null.
+    </st:attribute>
+    <st:attribute name="expressionAllowed">
+      If expressions are allowed then the user can choose between a select drop down and entering an expression.
+    </st:attribute>
+    <st:attribute name="includeUser">
+      If the user's scoped stores should be included
+    </st:attribute>
+    <st:attribute name="includeUserCaution">
+      Feature flag: show a checkbox and caution message for including user's scoped stores.
+      This is useful on forms controlled by other users.
+    </st:attribute>
+    <st:attribute name="descriptors">
+      Feature flag: show a checkbox and caution message for including user's scoped stores.
+      This is useful on forms controlled by other users.
+    </st:attribute>
+    <st:attribute name="context">
+      The context within which to look up the stores. (defaults to <code>it</code> (jelly) / <code>my</code> (groovy))
+    </st:attribute>
+    <st:attribute name="checkMethod">
+      Specify <code>post</code> if a <code>doCheckXXX</code> method is <code>@RequirePOST</code>
+      (for example because it checks <code>CredentialsProvider.USE_ITEM</code> permission).
+    </st:attribute>
+  </st:documentation>
+  <f:prepareDatabinding/>
+  <j:set var="value" value="${attrs.value ?: instance[attrs.field] ?: attrs.default}" />
+  <j:set var="paramValue" value="${attrs.expressionAllowed and value.startsWith('${') and value.endsWith('}')}"/>
+  <j:set var="paramDefault" value="${attrs.expressionAllowed and attrs.default.startsWith('${') and attrs.default.endsWith('}')}"/>
+  <j:set var="selectHelper" value="${app.getDescriptorByName('com.cloudbees.plugins.credentials.CredentialsSelectHelper')}"/>
+  <j:set var="includeUser" value="${attrs.includeUser ? true : false}"/>
+  <j:set var="context" value="${selectHelper.resolveContext(attrs.context ?: it)}"/>
+  <div class="credentials-select-control">
+    <j:if test="${attrs.expressionAllowed}">
+      <label field-disabled="true">
+        <input type="radio" name="${attrs.name ?: '_.'+attrs.field}" value="select"
+               class="credentials-select-radio-control" checked="${paramValue?null:'true'}"/>
+        ${%fixedSelection}
+      </label>
+      <label field-disabled="true">
+        <input type="radio" name="${attrs.name ?: '_.'+attrs.field}" value="param"
+               class="credentials-select-radio-control" checked="${paramValue?'true':null}"/>
+        ${%paramExpression}
+      </label>
+    </j:if>
+    <div field-disabled="${paramValue?'true':null}"
+         class="credentials-select-content-select ${paramValue?'credentials-select-content-inactive':'credentials-select-content-active'}">
+      <j:choose>
+        <j:when test="${includeUser and attrs.includeUserCaution}">
+          <div class="include-user-credentials">
+            <a href="#" class="help-btn"><l:icon class="icon-help icon-sm" alt="${%Help}"/></a>
+            <div class="help-content" hidden="hidden">
+              <p>${%includeUserCredentialsHelp}</p>
+              <div class="from-plugin">
+                (from <a href="https://wiki.jenkins.io/display/JENKINS/Credentials+Plugin">Credentials Plugin</a>)
+              </div>
+            </div>
+          </div>
+        </j:when>
+        <j:otherwise>
+          <input type="hidden" name="includeUser" value="${includeUser}"/>
+        </j:otherwise>
+      </j:choose>
+      <f:select clazz="${attrs.clazz} credentials-select" field="${attrs.field}"
+                default="${paramDefault?'':attrs.default}" value="${paramValue?(paramDefault?'':attrs.default):value}"
+                checkMethod="${attrs.checkMethod}"/>
+      <!-- TODO  add support for checking permissions against stores in request path -->
+      <st:nbsp/>
+      <j:set var="storeItems" value="${selectHelper.getStoreItems(context, includeUser)}"/>
+<!--      <j:choose>-->
+<!--        <j:when test="${selectHelper.hasCreatePermission(context, includeUser) and storeItems != null and !storeItems.isEmpty()}">-->
+          <button type="button" class="credentials-add-menu hetero-list-add" menualign="${attrs.menuAlign}"
+                  suffix="${attrs.name}">
+            <l:icon class="icon-credentials-new-credential icon-sm"/>
+            ${%Create}
+          </button>
+          <div class="credentials-add-menu-items yuimenu">
+            <div class="bd">
+            <ul class="first-of-type">
+            <j:forEach var="storeItem" items="${descriptors}">
+              <j:choose>
+<!--                <j:when test="${storeItem.enabled}">-->
+                  <li class="yuimenuitem" data-url="${request.contextPath}/${storeItem.getDescriptorUrl()}/dialog">
+                    <span class="yuimenuitemlabel" tooltip="${storeItem.description}">
+                      <l:icon class="${storeItem.iconClassName} icon-sm"/>
+                      ${storeItem.displayName}
+                    </span>
+                  </li>
+<!--                </j:when>-->
+<!--                <j:otherwise>-->
+<!--                  <li class="yuimenuitem" disabled="disabled">-->
+<!--                    <span class="yuimenuitemlabel" tooltip="${storeItem.description}" disabled="disabled">-->
+<!--                      <l:icon class="${storeItem.iconClassName} icon-sm"/>-->
+<!--                      ${storeItem.displayName}-->
+<!--                    </span>-->
+<!--                  </li>-->
+<!--                </j:otherwise>-->
+              </j:choose>
+            </j:forEach>
+            </ul>
+            </div>
+          </div>
+<!--        </j:when>-->
+<!--        <j:otherwise>-->
+<!--          <button class="credentials-add" type="button" disabled="disabled">-->
+<!--            <l:icon class="icon-credentials-new-credential icon-sm"/>-->
+<!--            ${%Create}-->
+<!--          </button>-->
+<!--        </j:otherwise>-->
+<!--      </j:choose>-->
+
+    </div>
+<!--    <j:if test="${attrs.expressionAllowed}">-->
+<!--      <div class="credentials-select-content-param ${paramValue?'credentials-select-content-active':'credentials-select-content-inactive'}">-->
+<!--        <f:textbox value="${paramValue?value:(paramDefault?attrs.default:'')}" clazz="${attrs.clazz} credentials-select"-->
+<!--                   field="${attrs.field}" default="${paramDefault?attrs.default:''}"/>-->
+<!--        <div class="error" style="display:none;">-->
+<!--          ${%invalidExpression}-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </j:if>-->
+  </div>
+  <script>
+    // HACK: can be removed once base version of Jenkins has fix of https://issues.jenkins-ci.org/browse/JENKINS-26578
+    // conditionally include the adjunct resources as AdjunctManager doesn't do this correctly for CSS
+    if (!document.getElementById('lib.ec2fleet.select')) {
+      var link = document.createElement('link');
+      link.id = 'lib.ec2fleet.select';
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = "${request.contextPath+'/'+app.getAdjuncts(null).rootURL+'/lib/ec2fleet/select.css'}";
+      link.media = 'all';
+      document.getElementsByTagName('head')[0].appendChild(link);
+      var script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = "${request.contextPath+'/'+app.getAdjuncts(null).rootURL+'/lib/ec2fleet/select.js'}";
+      document.getElementsByTagName('body')[0].appendChild(script);
+    }
+  </script>
+</j:jelly>

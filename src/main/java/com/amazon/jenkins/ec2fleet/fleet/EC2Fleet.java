@@ -12,6 +12,9 @@ import hudson.util.ListBoxModel;
  */
 public interface EC2Fleet {
 
+    void create(
+            final String awsCredentialsId, final String regionName, final String endpoint);
+
     void describe(
             final String awsCredentialsId, final String regionName, final String endpoint,
             final ListBoxModel model, final String selectedId, final boolean showAll);

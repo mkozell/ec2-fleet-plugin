@@ -2,7 +2,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
          xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form"
-         xmlns:c="/lib/credentials">
+         xmlns:c="/lib/credentials"
+         xmlns:a="/lib/ec2fleet">
 
     <f:entry title="${%Name}" field="name">
         <f:textbox default="FleetCloud"/>
@@ -23,64 +24,24 @@
       <f:select/>
     </f:entry>
 
-    <f:description>Endpoint like https://ec2.us-east-2.amazonaws.com</f:description>
-    <f:entry title="${%Endpoint}" field="endpoint">
-      <f:textbox default=""/>
-    </f:entry>
-
     <f:description>Fleet list will be available once region and credentials are specified. Only maintain supported, see help</f:description>
     <f:entry title="${%EC2 Fleet}" field="fleet">
         <f:select/>
     </f:entry>
 
+
+
     <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="awsCredentialsId,region,fleet" />
 
-    <f:entry title="${%Show all fleets}" field="showAllFleets">
-        <f:checkbox />
+    <f:entry title="${%Add}">
+        <a:select field="value" default="${it.defaultValue}" descriptors="${descriptor.getAADescriptors()}" includeUser="true" includeUserCaution="true"/>
     </f:entry>
 
-    <f:entry title="${%Launcher}" field="laucnher">
-      <f:dropdownDescriptorSelector field="computerConnector" descriptors="${descriptor.getComputerConnectorDescriptors()}"/>
-    </f:entry>
+    <!--<f:button title="${%Create New}" progress="${%Creating...}" method="createNew" with="awsCredentialsId,region,fleet" onClick="console.log(1)"/>-->
 
-    <f:description>Connect using private IP</f:description>
-    <f:entry title="${%Connect Private}" field="privateIpUsed">
-      <f:checkbox />
-    </f:entry>
-
-    <f:description>Always reconnect to offline nodes</f:description>
-    <f:entry title="${%Always Reconnect}" field="alwaysReconnect">
-      <f:checkbox />
-    </f:entry>
-
-    <f:description>Only build jobs with label expressions matching this node
-    </f:description>
-    <f:entry title="${%Restrict usage}" field="restrictUsage">
-      <f:checkbox />
-    </f:entry>
-
-    <f:description>Labels to add to instances in this fleet</f:description>
-    <f:entry title="${%Label}" field="labelString">
-      <f:textbox clazz="required" default="ec2-fleet" />
-    </f:entry>
-
-    <f:description>Default is /tmp/jenkins-&lt;random ID&gt;</f:description>
-    <f:entry title="${%Jenkins Filesystem Root}" field="fsRoot">
-      <f:textbox />
-    </f:entry>
-
-    <f:description>Number of executors per instance</f:description>
-    <f:entry title="${%Number of Executors}" field="numExecutors">
-      <f:textbox clazz="required positive-number" default="1" />
-    </f:entry>
-
-    <f:entry title="${%Scale Executors by Weight}" field="scaleExecutorsByWeight">
-      <f:checkbox />
-    </f:entry>
-
-    <f:entry title="${%Max Idle Minutes Before Scaledown}" field="idleMinutes">
-      <f:number clazz="required number" min="0" default="0" />
-    </f:entry>
+    <!--<f:block>
+    <input id="credentials-add-submit" class="yui-button" value="${%Add}"
+                           onclick="return window.credentials.addSubmit(this);"/></f:block>-->
 
     <f:entry title="${%Minimum Cluster Size}" field="minSize">
       <f:number clazz="required number" min="0" default="1" />
@@ -90,24 +51,78 @@
       <f:number clazz="required positive-number" default="1" />
     </f:entry>
 
-    <f:description>Disable auto resubmit build if failed because of EC2 instance termination like Spot</f:description>
-    <f:entry title="${%Disable build resubmit}" field="disableTaskResubmit">
-      <f:checkbox />
-    </f:entry>
+    <f:advanced>
+        <f:entry title="${%Show all fleets}" field="showAllFleets">
+            <f:checkbox />
+        </f:entry>
 
-    <f:description>Maximum time to wait for EC2 instance startup</f:description>
-    <f:entry title="${%Maximum Init Connection Timeout in sec}" field="initOnlineTimeoutSec">
-      <f:number clazz="required positive-number" default="180" />
-    </f:entry>
+        <f:description>Number of executors per instance</f:description>
+        <f:entry title="${%Number of Executors}" field="numExecutors">
+          <f:textbox clazz="required positive-number" default="1" />
+        </f:entry>
 
-    <f:description>Interval for updating EC2 cloud status</f:description>
-    <f:entry title="${%Cloud Status Interval in sec}" field="cloudStatusIntervalSec">
-      <f:number clazz="required positive-number" default="10" />
-    </f:entry>
+        <f:description>Endpoint like https://ec2.us-east-2.amazonaws.com</f:description>
+        <f:entry title="${%Endpoint}" field="endpoint">
+          <f:textbox default=""/>
+        </f:entry>
 
-    <f:description>Enable faster provision when queue is growing</f:description>
-    <f:entry title="${%No Delay Provision Strategy}" field="noDelayProvision">
-      <f:checkbox />
-    </f:entry>
+        <f:description>Always reconnect to offline nodes</f:description>
+        <f:entry title="${%Always Reconnect}" field="alwaysReconnect">
+          <f:checkbox />
+        </f:entry>
+
+        <f:description>Labels to add to instances in this fleet</f:description>
+        <f:entry title="${%Label}" field="labelString">
+          <f:textbox clazz="required" default="ec2-fleet" />
+        </f:entry>
+
+        <f:entry title="${%Max Idle Minutes Before Scaledown}" field="idleMinutes">
+          <f:number clazz="required number" min="0" default="0" />
+        </f:entry>
+
+        <f:description>Default is /tmp/jenkins-&lt;random ID&gt;</f:description>
+        <f:entry title="${%Jenkins Filesystem Root}" field="fsRoot">
+          <f:textbox />
+        </f:entry>
+
+        <f:entry title="${%Launcher}" field="laucnher">
+          <f:dropdownDescriptorSelector field="computerConnector" descriptors="${descriptor.getComputerConnectorDescriptors()}"/>
+        </f:entry>
+
+        <f:description>Connect using private IP</f:description>
+        <f:entry title="${%Connect Private}" field="privateIpUsed">
+          <f:checkbox />
+        </f:entry>
+
+        <f:description>Only build jobs with label expressions matching this node
+        </f:description>
+        <f:entry title="${%Restrict usage}" field="restrictUsage">
+          <f:checkbox />
+        </f:entry>
+
+        <f:entry title="${%Scale Executors by Weight}" field="scaleExecutorsByWeight">
+          <f:checkbox />
+        </f:entry>
+
+        <f:description>Disable auto resubmit build if failed because of EC2 instance termination like Spot</f:description>
+        <f:entry title="${%Disable build resubmit}" field="disableTaskResubmit">
+          <f:checkbox />
+        </f:entry>
+
+        <f:description>Maximum time to wait for EC2 instance startup</f:description>
+        <f:entry title="${%Maximum Init Connection Timeout in sec}" field="initOnlineTimeoutSec">
+          <f:number clazz="required positive-number" default="180" />
+        </f:entry>
+
+        <f:description>Interval for updating EC2 cloud status</f:description>
+        <f:entry title="${%Cloud Status Interval in sec}" field="cloudStatusIntervalSec">
+          <f:number clazz="required positive-number" default="10" />
+        </f:entry>
+
+        <f:description>Enable faster provision when queue is growing</f:description>
+        <f:entry title="${%No Delay Provision Strategy}" field="noDelayProvision">
+          <f:checkbox />
+        </f:entry>
+    </f:advanced>
 
 </j:jelly>

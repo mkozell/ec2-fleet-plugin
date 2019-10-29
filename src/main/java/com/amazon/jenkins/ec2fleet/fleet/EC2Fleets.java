@@ -10,7 +10,8 @@ import java.util.List;
 public class EC2Fleets {
 
     private static final String EC2_SPOT_FLEET_PREFIX = "sfr-";
-    private static final EC2SpotFleet EC2_SPOT_FLEET = new EC2SpotFleet();
+    public static final EC2SpotFleet EC2_SPOT_FLEET = new EC2SpotFleet();
+    private static final AutoScalingGroupFleet AUTO_SCALING_GROUP_FLEET = new AutoScalingGroupFleet();
 
     private static EC2Fleet GET = null;
 
@@ -31,7 +32,7 @@ public class EC2Fleets {
         if (id.startsWith(EC2_SPOT_FLEET_PREFIX)) {
             return EC2_SPOT_FLEET;
         } else {
-            return new AutoScalingGroupFleet();
+            return AUTO_SCALING_GROUP_FLEET;
         }
     }
 
