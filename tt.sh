@@ -1,0 +1,1 @@
+aws cloudformation create-stack --stack-name myteststack --template-body file://test.yml --parameters ParameterKey=ImageId,ParameterValue=ami-0b69ea66ff7391e80

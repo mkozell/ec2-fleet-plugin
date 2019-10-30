@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A sample template
+Parameters:
+  ImageId:
+    Type: String
+    Description: Image ID
+  InstanceType:
+    Type: String
+    Default: c3.xlarge
+    Description: Instance Type
+Resources:
+#  AutoScalingGroupSlr:
+#    Type: AWS::IAM::ServiceLinkedRole
+#    Properties:
+#      AWSServiceName: autoscaling.amazonaws.com
+#      Description: Default Service-Linked Role enables access to AWS Services and Resources used or managed by Auto Scaling
+#      CustomSuffix: ec2-fleet-plugin
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+#        BlockDeviceMappings:
+#          - BlockDeviceMapping
+#        CapacityReservationSpecification:
+#          CapacityReservationSpecification
+#        CpuOptions:
+#            CpuOptions
+#          CreditSpecification:
+#            CreditSpecification
+#          DisableApiTermination: Boolean
+#          EbsOptimized: Boolean
+#          ElasticGpuSpecifications:
+#            - ElasticGpuSpecification
+#          ElasticInferenceAccelerators:
+#            - LaunchTemplateElasticInferenceAccelerator
+#          HibernationOptions:
+#            HibernationOptions
+#          IamInstanceProfile:
+#            IamInstanceProfile
+        ImageId: !Ref ImageId
+#          InstanceInitiatedShutdownBehavior: String
+#          InstanceMarketOptions:
+#            InstanceMarketOptions
+        InstanceType: !Ref InstanceType
+#          KernelId: String
+#          KeyName: String
+#          LicenseSpecifications:
+#            - LicenseSpecification
+#          Monitoring:
+#            Monitoring
+#          NetworkInterfaces:
+#            - NetworkInterface
+#          Placement:
+#            Placement
+#          RamDiskId: String
+#          SecurityGroupIds:
+#            - String
+#          SecurityGroups:
+#            - String
+#          TagSpecifications:
+#            - TagSpecification
+#          UserData: String
+  #      LaunchTemplateName: String
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-as-group.html
+  # default ServiceLinkedRoleARN will be created automatically by ASG
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      #      AutoScalingGroupName: ASG
+      AvailabilityZones:
+        Fn::GetAZs:
+          Ref: AWS::Region
+      #      Cooldown: String
+      #      DesiredCapacity: 0
+      #      HealthCheckGracePeriod: Integer
+      #      HealthCheckType: String
+      #        InstanceId: String
+      #        LaunchConfigurationName: String
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: 1
+      #        LifecycleHookSpecificationList:
+      #          - LifecycleHookSpecification
+      #        LoadBalancerNames:
+      #          - String
+      MaxSize: 0
+      #      MetricsCollection:
+      #          - MetricsCollection
+      MinSize: 0
+#        MixedInstancesPolicy:
+#          MixedInstancesPolicy
+#        NotificationConfigurations:
+#          - NotificationConfiguration
+#        PlacementGroup: String
+#      ServiceLinkedRoleARN:
+#        Fn::GetAtt: [AutoScalingGroupSlr, Arn]
+#        Tags:
+#          - TagProperty
+#        TargetGroupARNs:
+#          - String
+#        TerminationPolicies:
+#          - String
+#        VPCZoneIdentifier:
+#          - String
+Outputs:
+  AutoScalingGroup:
+    Value: !Ref AutoScalingGroup
