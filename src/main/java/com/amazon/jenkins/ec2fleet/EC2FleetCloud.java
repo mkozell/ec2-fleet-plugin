@@ -655,12 +655,12 @@ public class EC2FleetCloud extends AbstractEC2FleetCloud {
         if (newFleetInstances.size() > 0) {
             // We tag new instances to help users to identify instances launched from plugin managed fleets.
             // If it fails we are fine to skip this call
-            try {
-                Registry.getEc2Api().tagInstances(ec2, newFleetInstances.keySet(),
-                        EC2_INSTANCE_CLOUD_NAME_TAG, name);
-            } catch (final Exception e) {
-                warning(e, "Failed to tag new instances: %s", newFleetInstances.keySet());
-            }
+            // try {
+            //     Registry.getEc2Api().tagInstances(ec2, newFleetInstances.keySet(),
+            //             EC2_INSTANCE_CLOUD_NAME_TAG, name);
+            // } catch (final Exception e) {
+            //     warning(e, "Failed to tag new instances: %s", newFleetInstances.keySet());
+            // }
 
             // addNewSlave will call addNode which calls queue lock.
             // We speed up this by getting one lock for all nodes to all
